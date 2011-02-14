@@ -7,6 +7,9 @@
 <form method="POST" action="" ><br>
   <h4>Notes:  Description including data creation method, missing value filling method ...</h4>
   <textarea name="notes" rows="20" cols="110">{{ ct.description }}</textarea><br>
+  <h4>Source:</h4>
+  <textarea name="source" rows="2" cols="110">{{ ct.source }}</textarea><br>
+  <h4>Revision Time:</h4>{{ ct.last_modified_time }}
 </form>
 {% endblock %}
 

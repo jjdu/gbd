@@ -21,10 +21,10 @@ import gbd.fields
 import gbd.view_utils as view_utils
 from gbd.unicode_csv_reader import unicode_csv_reader
 import dismod3
-
+from gbd.covariate_data_server.models import CovariateType
 from models import *
 from gbd.dismod3.utils import clean
-from gbd.dismod3.settings import JOB_LOG_DIR, JOB_WORKING_DIR, SERVER_LOAD_STATUS_HOST, SERVER_LOAD_STATUS_PORT, SERVER_LOAD_STATUS_SIZE
+from gbd.dismod3.settings import JOB_LOG_DIR, JOB_WORKING_DIR, SERVER_LOAD_STATUS_HOST, SERVER_LOAD_STATUS_PORT, SERVER_LOAD_STATUS_SIZE, DISMOD_BASE_URL
 from gbd.dismod3.table import population_by_region_year_sex
 from gbd.dismod3.neg_binom_model import countries_for
 import fcntl
@@ -141,6 +141,22 @@ def data_upload(request, id=-1):
                 
 
             return HttpResponseRedirect(reverse('gbd.dismod_data_server.views.dismod_summary', args=[dm.id])) # Redirect after POST
+
+    # find covariate slugs
+    cov_types = CovariateType.objects.all()
+    cov_slugs = ''
+    for cov_type in cov_types:
+        if cov_slugs != '':
+            cov_slugs += ','
+        cov_slugs += cov_type.slug
+
+    # modify datachecker.jnlp file
+    f = open('public/datachecker.jnlp')
+    text = f.read().replace('base_url', DISMOD_BASE_URL).replace('session_id', request.COOKIES['sessionid']).replace('cov_slugs', cov_slugs)
+    f.close()
+    f = open('public/dc.jnlp', 'w')
+    f.write(text)
+    f.close()
 
     return render_to_response('data_upload.html', {'form': form, 'dm': dm})
 

@@ -8,4 +8,6 @@ urlpatterns = patterns('gbd.covariate_data_server.views',
     (r'datacount/(\d+)$', 'covariate_data_count_show'),
     (r'show/([\w-]+)\+(\w+).(\w+)$', 'covariate_data_value_show'),
     (r'notes/(\d+)$', 'covariate_notes_show'),
+    (r'get_types/$', 'get_covariate_types'),
+    (r'get_data/$', 'get_covariate_data'),
 )

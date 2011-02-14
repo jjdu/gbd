@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<jnlp spec="1.0" codebase="http://winthrop.ihme.washington.edu/public/" href="datachecker.jnlp">
+<jnlp spec="1.0" codebase="base_urlpublic/" href="dc.jnlp">
    <information>
       <title>Data Checker</title>
       <vendor>IHME UW</vendor>
@@ -13,5 +13,9 @@
       <jar href="DataChecker.jar"/>
       <jar href="opencsv-2.2.jar"/>
    </resources>
-   <application-desc main-class="uw.ihme.dismod.DataCheckerFrame"/>
+   <application-desc main-class="uw.ihme.dismod.DataCheckerFrame">
+      <argument>base_url</argument>
+      <argument>session_id</argument>
+      <argument>cov_slugs</argument>
+   </application-desc>
 </jnlp>

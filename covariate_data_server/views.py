@@ -4,9 +4,12 @@ from django.http import *
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext as _
 from django import forms
+from django.db import transaction
 from datetime import datetime
+import simplejson as json
 import pylab as pl
 import csv
+import StringIO
 from gbd.covariate_data_server.models import *
 from gbd import view_utils
 from gbd.dismod3.settings import CSV_PATH
@@ -45,17 +48,35 @@ def covariate_data_count_show(request, id):
         the id of the covariate type to display
     """
     ct = get_object_or_404(CovariateType, id=id)
+    cov_list = Covariate.objects.filter(type=ct)
     
     if ct.region_only:
-        pm = ct.covariate_set.all().distinct().values('region')
-
-        for c in pm:
+        region_dict = {}
+        for cov in cov_list:
+            region = cov.region
+            if region_dict.has_key(region):
+                region_dict[region] = region_dict[region] + 1
+            else:
+                region_dict[region] = 1
+        pm = []
+        for region in region_dict:
+            c = {'region':region, 'count':region_dict[region]}
             c['clean_region'] = clean(c['region'])
-            c['count'] = ct.covariate_set.filter(region=c['region']).count()
             if c['count'] < (ct.year_end - ct.year_start + 1) * 3:
                 c['color'] = 'class=highlight'
             else:
                 c['color'] = ''
+            pm.append(c)
+
+        #pm = ct.covariate_set.all().distinct().values('region')
+
+        #for c in pm:
+            #c['clean_region'] = clean(c['region'])
+            #c['count'] = ct.covariate_set.filter(region=c['region']).count()
+            #if c['count'] < (ct.year_end - ct.year_start + 1) * 3:
+                #c['color'] = 'class=highlight'
+            #else:
+                #c['color'] = ''
         
         if len(pm) != 21:
             error = 'Total number of regions are wrong.  Found ' + str(len(pm)) + '.  Should be 21.'
@@ -66,14 +87,30 @@ def covariate_data_count_show(request, id):
                                   {'ct': ct, 'level': 'region', 'error': error,
                                    'paginated_models': view_utils.paginated_models(request, pm)})
     else:
-        pm = ct.covariate_set.all().distinct().values('iso3')
-
-        for c in pm:
-            c['count'] = ct.covariate_set.filter(iso3=c['iso3']).count()
+        iso3_dict = {}
+        for cov in cov_list:
+            iso3 = cov.iso3
+            if iso3_dict.has_key(iso3):
+                iso3_dict[iso3] = iso3_dict[iso3] + 1
+            else:
+                iso3_dict[iso3] = 1
+        pm = []
+        for iso3 in iso3_dict:
+            c = {'iso3':iso3, 'count':iso3_dict[iso3]}
             if c['count'] < (ct.year_end - ct.year_start + 1) * 3:
                 c['color'] = 'class=highlight'
             else:
                 c['color'] = ''
+            pm.append(c)
+
+        #pm = ct.covariate_set.all().distinct().values('iso3')
+
+        #for c in pm:
+            #c['count'] = ct.covariate_set.filter(iso3=c['iso3']).count()
+            #if c['count'] < (ct.year_end - ct.year_start + 1) * 3:
+                #c['color'] = 'class=highlight'
+            #else:
+                #c['color'] = ''
 
         return render_to_response('covariate_data_count_show.html',
                                   {'ct': ct, 'level': 'country',
@@ -88,30 +125,65 @@ def covariate_type_show(request, id):
         the id of the covariate type to display
     """
     ct = get_object_or_404(CovariateType, id=id)
+    cov_list = Covariate.objects.filter(type=ct)
 
     if ct.region_only:
-        pm = ct.covariate_set.all().distinct().values('region', 'sex')
-
-        for c in pm:
+        region_dict = {}
+        for cov in cov_list:
+            key = cov.region + '+' + cov.sex
+            if region_dict.has_key(key):
+                region_dict[key] = region_dict[key] + 1
+            else:
+                region_dict[key] = 1
+        pm = []
+        for key in region_dict:
+            region, sex = key.split('+')
+            c = {'region':region, 'sex':sex, 'count':region_dict[key]}
             c['clean_region'] = clean(c['region'])
-            c['count'] = ct.covariate_set.filter(region=c['region'], sex=c['sex']).count()
-            if c['count'] < ct.year_end - ct.year_start + 1:
+            if c['count'] < (ct.year_end - ct.year_start + 1) * 3:
                 c['color'] = 'class=highlight'
             else:
                 c['color'] = ''
+            pm.append(c)
+
+        #pm = ct.covariate_set.all().distinct().values('region', 'sex')
+
+        #for c in pm:
+            #c['clean_region'] = clean(c['region'])
+            #c['count'] = ct.covariate_set.filter(region=c['region'], sex=c['sex']).count()
+            #if c['count'] < ct.year_end - ct.year_start + 1:
+                #c['color'] = 'class=highlight'
+            #else:
+                #c['color'] = ''
 
         return render_to_response('covariate_type_show.html',
                                   {'ct': ct, 'level': 'region',
                                    'paginated_models': view_utils.paginated_models(request, pm)})
     else:
-        pm = ct.covariate_set.all().distinct().values('iso3', 'sex')
-
-        for c in pm:
-            c['count'] = ct.covariate_set.filter(iso3=c['iso3'], sex=c['sex']).count()
-            if c['count'] < ct.year_end - ct.year_start + 1:
+        iso3_dict = {}
+        for cov in cov_list:
+            key = cov.iso3 + '+' + cov.sex
+            if iso3_dict.has_key(key):
+                iso3_dict[key] = iso3_dict[key] + 1
+            else:
+                iso3_dict[key] = 1
+        pm = []
+        for key in iso3_dict:
+            c = {'iso3':key[:3], 'sex':key[3:], 'count':iso3_dict[key]}
+            if c['count'] < (ct.year_end - ct.year_start + 1) * 3:
                 c['color'] = 'class=highlight'
             else:
                 c['color'] = ''
+            pm.append(c)
+
+        #pm = ct.covariate_set.all().distinct().values('iso3', 'sex')
+
+        #for c in pm:
+            #c['count'] = ct.covariate_set.filter(iso3=c['iso3'], sex=c['sex']).count()
+            #if c['count'] < ct.year_end - ct.year_start + 1:
+                #c['color'] = 'class=highlight'
+            #else:
+                #c['color'] = ''
 
         return render_to_response('covariate_type_show.html',
                                   {'ct': ct, 'level': 'country',
@@ -211,7 +283,6 @@ def covariate_show(request, type, area, sex, format='png'):
 class NewDataForm(forms.Form):
     type = forms.CharField(max_length=50)
     file  = forms.FileField()
-    rescale = forms.BooleanField(initial=True, required=False, help_text='Transform data to have mean o and variance 1?')
     source = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows':1, 'cols':90, 'wrap': 'off'}))
     yearStart = forms.IntegerField(required=False)
     yearEnd = forms.IntegerField(required=False)
@@ -326,7 +397,7 @@ def covariate_upload(request):
             # form contents
             type_slug = form.cleaned_data['type']
             cov_data = form.cleaned_data['file']
-            cov_type, is_new = CovariateType.objects.get_or_create(slug=type_slug, defaults={'year_start': 0, 'year_end': 0})
+            cov_type, is_new = CovariateType.objects.get_or_create(slug=type_slug, defaults={'year_start': 0, 'year_end': 0, 'mean': 0., 'variance': 0.})
 
             if is_new and request.POST.get('notes') == '':
                  return render_to_response('covariate_upload.html', {'form': form, 'error': 'Notes are missing.'})
@@ -348,49 +419,221 @@ def covariate_upload(request):
                 cov_type.year_end = form.cleaned_data['yearEnd']
 
             cov_type.region_only = form.cleaned_data['regionOnly']
+
+            vals = [d['value'] for d in cov_data]
+
+            cov_type.mean = pl.mean(vals)
+
+            scale = pl.std(vals)
+            cov_type.variance = scale * scale
         
             cov_type.save()
 
-            # make rates from rate_list
-            vals = [d['value'] for d in cov_data]
-
-            if form.cleaned_data['rescale']:
-                shift = pl.mean(vals)
-                scale = pl.std(vals)
-            else:
-                shift = 0.
-                scale = 1.
-            
-            for d in cov_data:
-                # if sex == '' add a covariate for male, female, and total
-                if d['sex'] == '':
-                    sex_list = ['male', 'female', 'total']
-                else:
-                    sex_list = [d['sex']]
-                for sex in sex_list:
-                    # add a data point, save it on the data list
-                    if d.has_key('iso3'):
-                        cov, is_new = Covariate.objects.get_or_create(type=cov_type,
-                                                                      iso3=d['iso3'],
-                                                                      year=d['year'],
-                                                                      sex=sex,
-                                                                      defaults={'value': 0.})
-                        if d.has_key('region'):
-                            cov.region = d['region']
-                    else:
-                        cov, is_new = Covariate.objects.get_or_create(type=cov_type,
-                                                                      region=d['region'],
-                                                                      year=d['year'],
-                                                                      sex=sex,
-                                                                      defaults={'value': 0.})
-                    cov.value = (d['value'] - shift) / scale
-                    
-                    if d.has_key('age'):
-                        cov.age = d['age']
-                    
-                    cov.save()
+            save_covariates(cov_type, cov_data)
 
             return HttpResponseRedirect(reverse('gbd.covariate_data_server.views.covariate_type_list_show')) # Redirect after POST
 
     return render_to_response('covariate_upload.html', {'form': form, 'error': ''})
+
+@transaction.commit_on_success
+def save_covariates(cov_type, cov_data):
+    """ Save covariate data in database
+
+    Parameters:
+    -----------
+      cov_type : CovariateType object
+      cov_data : List of covariate data dicts
+    """
+    # clean up
+    Covariate.objects.filter(type=cov_type).delete()
+
+    # insert covariate data
+    for d in cov_data:
+        # if sex == '' add a covariate for male, female, and total
+        if d['sex'] == '':
+            sex_list = ['male', 'female', 'total']
+        else:
+            sex_list = [d['sex']]
+        for sex in sex_list:
+            # add a data point, save it on the data list
+            if d.has_key('iso3'):
+                cov = Covariate(type=cov_type, iso3=d['iso3'], year=d['year'], sex=sex, value=d['value'])
+                if d.has_key('region'):
+                    cov.region = d['region']
+            else:
+                cov = Covariate(type=cov_type, region=d['region'], year=d['year'], sex=sex, value=d['value'])
+                
+            if d.has_key('age'):
+                cov.age = d['age']
+                  
+            cov.save()
+
+@login_required
+def get_covariate_types(request):
+    """ Get all available covariate types in json
+
+    response:
+    ---------
+      covariate types : json dict
+        including key cov : a json list in a string, may be blank
+                        a list of dicts, each for a covariate type, of keys: slug, uploader,          
+                        upload_time, source, mean, variance, last_modified_time, year_start,
+                        year_end, description, region_only, completeness, or blank
+                      error : error in a string, may be blank  
+    """
+    # prepare response
+    response = dict(cov='', error='')
+
+    # get all covariateType objects from database
+    cov_types = CovariateType.objects.all()
+
+    # calculate number of countries and number of regions
+    iso3_data = [x[1:] for x in csv.reader(open(CSV_PATH + 'country_region.csv'))]
+    nCountry = 0
+    nRegion = 0
+    for r in iso3_data:
+        nCountry += len(r)
+        nRegion += 1;
+
+    nSex = 3
+
+    # make a list of covaraite type dicts
+    cov_list = []
+    for cov_type in cov_types:
+        # calculate completeness
+        iso3_data = [x[1:] for x in csv.reader(open(CSV_PATH + 'country_region.csv'))]
+        iso3_list = []
+        for r in iso3_data:
+            iso3_list += r
+
+        nData = Covariate.objects.filter(type=cov_type).count()
+        nYear = cov_type.year_end - cov_type.year_start + 1
+
+        if cov_type.region_only == 'True':
+            completeness = float(nData) / nYear / nSex / nRegion
+        else:
+            completeness = float(nData) / nYear / nSex / nCountry
+
+        # make a covariate type list
+        cov = {"slug" : cov_type.slug,
+               "uploader" : cov_type.uploader,
+               "upload time" : str(cov_type.upload_time)[0:19],
+               "source" : cov_type.source,
+               "revision time" : str(cov_type.last_modified_time)[0:19],
+               "year range" : str(cov_type.year_start) + '-' + str(cov_type.year_end),
+               "notes" : cov_type.description,
+               "region only" : str(cov_type.region_only),
+               "completeness" : str(completeness)[0:8],
+               "mean" : cov_type.mean,
+               "variance" : cov_type.variance}
+        cov_list.append(cov)
+
+    if len(cov_list) == 0:
+        response['cov'] = ''
+        response['error'] = 'Error: covariate type is missing'
+    else:
+        response['cov'] = cov_list
+        response['error'] = ''
+
+    # make a json of the list and return
+    return HttpResponse(json.dumps(response))
+
+@login_required
+def get_covariate_data(request):
+    """ Get covariate columns for data in csv
+
+    request.POST:
+    -------------
+      data_csv : csv
+        data columns Year_Start, Year_End and Sex are required and if a CovariateType that is 
+        region_only is included in cov_req Region is required otherwise Country ISO3 Code is required
+      cov_req : json
+        a list of dicts, each for a covariate type, of two keys: slug and transform that is a list of
+        transform strings: original, log, logit, squared, cubed, normalized, lag-<years> where <year> 
+        being the number of lag years  
+        example [{"slug": "GDP", "transform": ["original", "lag-5", "log"]}, {"slug": "ABC", "transform": ["squared"]}]
+
+    response:
+    ---------
+      covariate data : json dict
+        including key csv : csv in a string, may be blank
+                      error : error in a string, may be blank
+        if transform is original the column header is the slug, otherwise is <transform>_<slug>
+        example logit_GDP if transform is logit and slug is GDP
+    """
+    # prepare response
+    response = dict(csv='', error='')
+
+    # check input
+    data_csv = request.POST.get('data_csv', '')
+    if not data_csv:
+        response['error'] = 'Error: data_csv is missing'
+        HttpResponse(json.dumps(response))
+
+    cov_req_json = request.POST.get('cov_req_json', '')
+    if not cov_req_json:
+        response['error'] = 'Error: cov_json is missing'
+        HttpResponse(json.dumps(response))
+
+    # make a data list from data csv
+    csv_f = csv.DictReader(StringIO.StringIO(data_csv))
+    data_list = [d for d in csv_f]
+    if len(data_list) == 0:
+        response['error'] = 'Error: dataset is empty'
+        HttpResponse(json.dumps(response))
+
+    # make an input key list
+    key_list_in = data_list[0].keys()
+
+    # make a covariate request list from cov_json
+    cov_req_list = json.loads(cov_req_json)
+
+    # add covariates to data list
+    for cov_req in cov_req_list:
+        slug = cov_req['slug']
+        cov_type = CovariateType.objects.filter(slug = slug)[0]
+
+        transform_list = []
+        for transform in cov_req['transform']:
+            try:
+                if transform[:4] == 'lag-':
+                    data_list = cov_type.calculate_covariates_lag(data_list, int(transform[4:]))
+                else:
+                    transform_list.append(transform)
+            except Exception, e:
+                if response['error'] == '':
+                    response['error'] = 'Error: ' + str(e)
+                else:
+                    response['error'] = response['error'] + '\nError: ' + str(e)
+                return HttpResponse(json.dumps(response))
+
+        try:
+            data_list = cov_type.calculate_covariates(data_list, transform_list)
+        except Exception, e:
+            if response['error'] == '':
+                response['error'] = 'Error: ' + str(e)
+            else:
+                response['error'] = response['error'] + '\nError: ' + str(e)
+            return HttpResponse(json.dumps(response))
+
+    # make an output key list
+    key_list_out = list(set(data_list[0].keys()) - set(key_list_in))
+
+    # make a csv string
+    strIO = StringIO.StringIO()
+    writer = csv.writer(strIO)
+    writer.writerow(key_list_out)
+
+    for data in data_list:
+        row = []
+        for key in key_list_out:
+            row.append(data[key])
+        writer.writerow(row)
+
+    strIO.seek(0)
+    data_csv = strIO.read()
+    
+    # return the response in json
+    response['csv'] = data_csv
+    return HttpResponse(json.dumps(response))
 

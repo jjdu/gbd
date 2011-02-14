@@ -14,11 +14,11 @@
   <th>Type</th>
   <th>Uploader's Username</th>
   <th>Uploading Time</th>
-  <th>Source</th>
-  <th>Last Modified Time</th>
   <th>Year Range</th>
-  <th>region Only</th>
-  <th>Notes</th>
+  <th>Mean</th>
+  <th>Variance</th>
+  <th>Region Only</th>
+  <th>More</th>
 </tr>
 
 {% for c in ct %}
@@ -27,9 +27,9 @@
     <td><a href="../datacount/{{ c.id }}">{{ c.slug }}</a></td>
     <td>{{ c.uploader }}</td>
     <td>{{ c.upload_time }}</td>
-    <td>{{ c.source }}</td>
-    <td>{{ c.last_modified_time }}</td>
     <td>{{ c.year_start }}-{{ c.year_end }}</td>
+    <td>{{ c.mean }}</td>
+    <td>{{ c.variance }}</td>
     <td>{{ c.region_only }}</td>
     <td><a href="../notes/{{ c.id }}">show</a></td>
   </tr>
