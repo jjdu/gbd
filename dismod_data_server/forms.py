@@ -13,7 +13,7 @@ from gbd.unicode_csv_reader import unicode_csv_reader
 import dismod3
 
 from models import *
-from gbd.dismod3.utils import clean
+from gbd.dismod3.utils import clean, standardize_data_type
 from gbd.dismod3.settings import JOB_LOG_DIR, JOB_WORKING_DIR, SERVER_LOAD_STATUS_HOST, SERVER_LOAD_STATUS_PORT, SERVER_LOAD_STATUS_SIZE
 from gbd.dismod3.table import population_by_region_year_sex
 from gbd.dismod3.neg_binom_model import countries_for
@@ -140,7 +140,7 @@ No checks
                 raise forms.ValidationError(error_str % (r['_row'], 'Region'))
 
             try:
-                r['parameter'] = gbd.fields.standardize_data_type[r['parameter']]
+                r['parameter'] = standardize_data_type[r['parameter']]
             except KeyError:
                 raise forms.ValidationError(error_str % (r['_row'], 'Parameter'))
 

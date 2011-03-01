@@ -14,6 +14,7 @@ import inspect
 from dismod3.disease_json import DiseaseJson
 from dismod3 import neg_binom_model
 import dismod3.utils
+from dismod3.settings import gbd_regions
 
 def test_single_rate():
     """ Test fit for a single low-noise data point"""
@@ -470,6 +471,58 @@ def test_save_country_level_posterior():
     from upload_fits import zip_country_level_posterior_files
     zip_country_level_posterior_files(dm.id)
 
+def test_covariates():
+    """ test function covariates() in neg_binom_model """
+    d = {'parameter': 'Prevalence',
+         'gbd_region': 'Asia, Southeast',
+         'year_start': '1990',
+         'year_end': '2005',
+         'sex': 'male',
+         'self_report': 0.5,
+         'gdp': 0.8}
+    
+    covariates_dict = {'Study_level': {'Self report': {'rate': {'value': 1}, 'value': {'value': 0.5}, 'types': {'value': ['prevalence']}}},
+                       'Country_level': {'GDP': {'rate': {'value': 1}, 'value': {'value': 0.8}, 'types': {'value': ['prevalence', 'incidence']}},
+                                         '%_urban': {'rate': {'value': 1}, 'value': {'value': 0.6}, 'types': {'value': ['incidence', 'remission']}}}}
+
+    Xa, Xb = neg_binom_model.covariates(d, covariates_dict)
+
+    ok = 0
+    if len(Xa) != len(gbd_regions) + 2:
+        ok += 1
+        print 'Xa length is wrong'
+
+    for ii, r in enumerate(gbd_regions):
+        if dismod3.utils.clean(d['gbd_region']) == dismod3.utils.clean(r):
+            if Xa[ii] != 1.:
+                ok += 1
+                print 'Xa for specified region is not 1'
+        else:
+            if Xa[ii] != 0.:
+                ok += 1
+                print 'Xa for non-specified region is not 0'
+
+    if Xa[ii + 1] != .1 * (.5 * (float('1990') + float('2005')) - 1997):
+        ok += 1
+        print 'Xa for year is incorrect'
+
+    if Xa[ii + 2] != 0.5:
+        ok += 1
+        print 'Xa for sex is incorrect'
+
+    if len(Xb) != 2:
+        ok += 1
+        print 'Xb length is wrong'
+
+    if Xb[0] != d['self_report']:
+        ok += 1
+        print 'Xb for study level covariate is incorrect'
+    if Xb[1] != d['gdp']:
+        ok += 1
+        print 'Xb for country level covariate is incorrect'
+
+    print str(ok) + ' errors were found in neg_binom_model.covariates'
+
 if __name__ == '__main__':
     for test in [
         test_opi,
@@ -483,6 +536,7 @@ if __name__ == '__main__':
         test_linear_pattern,
         test_single_rate,
         test_save_country_level_posterior,
+        test_covariates,
         ]:
         try:
             test()

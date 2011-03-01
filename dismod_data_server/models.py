@@ -457,9 +457,10 @@ class DiseaseModel(models.Model):
                 'rate': dict(value=value, default=value),
                 'error': dict(value=0, default=0),
                 'value': dict(value='Country Specific Value', default='Country Specific Value'),  # value must be a string
+                'types': dict(value=[], default=['prevalence', 'incidence', 'remission', 'excess-mortality', 'duration', 'relative-risk']),
                 'range': [0, 10^6],
-                'category': ['', ''],
-                'defaults': dict([[c.iso3, c.value] for c in ct.covariate_set.all()])
+                'category': ['', '']#,
+                #'defaults': dict([[c.iso3, c.value] for c in ct.covariate_set.all()])
                 }
         return cov_dict
 
@@ -508,6 +509,7 @@ class DiseaseModel(models.Model):
             cov_dict[k] = dict(rate=dict(value=0, default=0),
                                error=dict(value=0, default=0),
                                value=dict(value='0', default='0'),
+                               types=dict(value=[], default=['prevalence', 'incidence', 'remission', 'excess-mortality', 'duration', 'relative-risk']),
                                range=[x_min, x_max],
                                category=sorted(x_vals)
                                )
@@ -517,8 +519,11 @@ class DiseaseModel(models.Model):
                 'rate': dict(value=0, default=0),
                 'error': dict(value=0, default=0),
                 'value': dict(value='', default='0.'),  # value must be a string
+                'types': dict(value=[], default=[]),
                 'range': [0, 1],
                 'category': ['0', '.5', '1']
                 }
             
         return cov_dict
+   
+

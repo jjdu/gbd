@@ -20,7 +20,7 @@ import pymc as mc
 import sys
 
 import dismod3
-from dismod3.utils import debug, interpolate, rate_for_range, indices_for_range, generate_prior_potentials, gbd_regions, clean, type_region_year_sex_from_key
+from dismod3.utils import debug, interpolate, rate_for_range, indices_for_range, generate_prior_potentials, gbd_regions, clean, type_region_year_sex_from_key, standardize_data_type
 from dismod3.settings import MISSING, NEARLY_ZERO, MAX_AGE
 
 def fit_emp_prior(dm, param_type, iter=30000, thin=20, burn=10000, dbname='/dev/null'):
@@ -256,7 +256,7 @@ def covariates(d, covariates_dict):
     Xb = []
     for level in ['Study_level', 'Country_level']:
         for k in sorted(covariates_dict[level]):
-            if covariates_dict[level][k]['rate']['value'] == 1:
+            if covariates_dict[level][k]['rate']['value'] == 1 and standardize_data_type[d['parameter']][:-5] in covariates_dict[level][k]['types']['value']:
                 Xb.append(float(d.get(clean(k)) or 0.))
     #debug('%s-%s-%s-%s: Xb = %s' % (d['sex'], d['year_start'], d['gbd_region'], d.get('country_iso3_code', 'none'), str(Xb)))
     if Xb == []:
@@ -297,7 +297,8 @@ def regional_covariates(key, covariates_dict):
     if not key in covariate_hash:
         t,r,y,s = type_region_year_sex_from_key(key)
 
-        d = {'gbd_region': r,
+        d = {'parameter': t,
+             'gbd_region': r,
              'year_start': y,
              'year_end': y,
              'sex': s}
@@ -321,7 +322,8 @@ def country_covariates(key, iso3, covariates_dict):
     if not (key, iso3) in covariate_hash:
         t,r,y,s = type_region_year_sex_from_key(key)
 
-        d = {'gbd_region': r,
+        d = {'parameter': t,
+             'gbd_region': r,
              'year_start': y,
              'year_end': y,
              'sex': s}
