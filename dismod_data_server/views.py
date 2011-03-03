@@ -985,7 +985,7 @@ def dismod_show_map(request, id):
 
     title = ''
     if map == 'data_count':
-        title = 'Data Count: model #'+id+' '+dm.condition+' (all types, all years, all sexes, all ages)'
+        title = 'Data Count: model #'+id+' '+dm.condition+' ('+count+', all years, all sexes, all ages)'
     elif map == 'data':
         title = 'Data Value: model #'+id+' '+dm.condition+' ('+type+', '+sex+', age '+str(age_start)+'-'+str(age_end)+', '+year+')'
     elif map == 'emp-prior':
