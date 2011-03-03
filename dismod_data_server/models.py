@@ -459,8 +459,8 @@ class DiseaseModel(models.Model):
                 'value': dict(value='Country Specific Value', default='Country Specific Value'),  # value must be a string
                 'types': dict(value=[], default=['prevalence', 'incidence', 'remission', 'excess-mortality', 'duration', 'relative-risk']),
                 'range': [0, 10^6],
-                'category': ['', '']#,
-                #'defaults': dict([[c.iso3, c.value] for c in ct.covariate_set.all()])
+                'category': ['', ''],
+                'defaults': dict([[c.iso3, c.value] for c in ct.covariate_set.all()])
                 }
         return cov_dict
 
