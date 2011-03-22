@@ -10,78 +10,70 @@ This document describes the complete input in json for running a DisMod job.
 
       'parameters' : param_list (required), see below,
 
-      'output_data' : output_data_csv (required), see below,
+      'output_template' : output_template_csv (required), see below,
 
-      'gdb_regions' : [str, str, ...] (required), list of distinct GDB Regions to fit
+      'areas_hierarchy' : [(parent_area, child_area), ...] (required), list of pairs of areas describing the area hierarchy,
+
+      'areas_to_fit' : [area_1, area_2, ...] (required), list of areas in area hierarchy,
     }
 
     input_data_csv = [input_data_1, input_data_2, ...] in csv (required), see below
 
     input_data_i = {
-      'condition' : str (required), one of the GBD causes,
-
       'data_type' : str (required), one of the following types
-                    'incidence data',
-                    'prevalence data',
-                    'remission data',
-                    'excess-mortality data',
-                    'relative-risk data',
-                    'smr data',
-                    'mortality data',
-                    'duration data',
-                    'cause-specific mortality data',
+                    'incidence',
+                    'prevalence',
+                    'remission',
+                    'excess-mortality',
+                    'relative-risk',
+                    'smr',
+                    'with-condition-mortality',
+                    'duration',
+                    'cause-specific-mortality',
+(note for adding additional data types in the future, data_types are lowercase characters and dashes, without any spaces or non-alphabet characters)
 
       'value' : float (required), parameter value limits
-                'incidence data' >= 0,
-                'prevalence data' [0, 1],
-                'remission data' >= 0,
-                'excess-mortality data' >=0,
-                'relative-risk data' >= 1,
-                'smr data' >= 1,
-                'mortality data >= 0,
-                'duration data' [0, 100],
-                'cause-specific mortality data'  >= 0,
+                'incidence' >= 0,
+                'prevalence' [0, 1],
+                'remission' >= 0,
+                'excess-mortality' >=0,
+                'relative-risk' >= 0,
+                'smr' >= 0,
+                'with-condition-mortality' >= 0,
+                'duration' >= 0,
+                'cause-specific-mortality'  >= 0,
 
-      'gbd_region' : str (required), one of the GBD regions,
-
-      'region' : str (required), country iso3 code,
+      'area' : str (required), a geographic area defined in the area table,
 
       'sex' : str (required), one of 'male', 'female', 'total',
 
-      'age_start' : int[0, 100], <= age_end (required),
+      'age_start' : int[0, 150], <= age_end (required),
 
-      'age_end' : int[0, 100], >= age_start (required),
+      'age_end' : int[0, 150], >= age_start (required),
 
-      'year_start' : int[1950, 2010], <= year_end (required),
+      'year_start' : int[1900, 2050], <= year_end (required),
 
-      'year_end' : int[1950, 2010], >= year_start (required),
+      'year_end' : int[1900, 2050], >= year_start (required),
 
-      'units' : float >= 1 (required),
+      'standard_error' : float > 0 (optional*),
+
+      'effective_sample_size' : int > 0, <= total_study_size_n (optional*),
+
+      'lower_ci' : float >= 0 <= Parameter Value (optional*),
+      
+      'upper_ci' : float > Parameter Value (optional*),
+
+(* one of se, ess, or ci must be set)
+
+      'age_weights' : [ float, float, ... ] (required*), length equals age_end - age_start + 1,
+                      default/missing assume to be [ 1, ... ],
+(* this will be merged in by the MDA and is not required of the user)
 
       'study_id' : int >= 0 (optional),
-
-      'sequela' : str, one of the GBD sequela codes (optional),
-
-      'case_definition' : str (optional),
-
-      'standard_error' : float > 0 (optional),
-
-      'effective_sample_size' : int > 0, <= total_study_size_n (optional),
-
-      'lower_ci' : float >= 0 <= Parameter Value (optional),
-      
-      'upper_ci' : float > Parameter Value (optional),
-
-      'total_study_size_n : int > 0 (optional),
-
-      'design_factor' : float >= 1 (optional),
 
       'citation' : str (optional),
 
       'ignore' : int[0, 1] (optional),
-
-      'age_weights' : [ float, float, ... ] (optional), length equals age_end - age_start + 1,
-                      default/missing assume to be [ 1, ... ],
 
       additional keys, with corresponding values for all study-level covariates, and all country-level   
       covariates merged for this data_type, this region, this sex, this year_start and this year_end
@@ -100,9 +92,11 @@ This document describes the complete input in json for running a DisMod job.
 
       'relative-risk' : param_dict (required) see below,
 
+      'condition' : str (required), one of the GBD causes,
+
       'notes' : str (required)
     ]
-
+---- continute checking here next time ---
     param_dict = {
       'priors' : prior_dict (required), see below,
 
@@ -164,74 +158,49 @@ This document describes the complete input in json for running a DisMod job.
     }
 
     study_level_type_i : {
-      'rate' : {
-        'value' : int = 0 or = 1 (required),
+      'rate' : int = 0 or = 1 (required),
 
-        'default' : 1 (required)
-      },
-
-      'error' : {
-        'value' : int = 0 or = 1 (required),
-
-        'default' : 0 (required)
-      },
-
-      'reference_value' : {
-        'value' : string (required),
-
-        'default' : "0" (required),
-      }
+      'error' : int = 0 or = 1 (required),
+      'reference_value' : string (required), a number
     }
 
     country_level_type_i : {
-      'rate' : {
-        'value' : int = 0 or = 1 (required),
+      'rate' : int = 0 or = 1 (required),
 
-        'default' : 1 (required)
-      },
+      'error' : int = 0 or = 1 (required),
 
-      'error' : {
-        'value' : int = 0 or = 1 (required),
-
-        'default' : 0 (required)
-      },
-
-      'reference_value' : {
-        'value' : string (required), a number or "Country Specific Value",
-
-        'default' : "Country Specific Value" (required)
-      }
+      'reference_value' : string (required), a number or "Country Specific Value",
     }
 
-    output_data_csv = [output_data_1, output_data_2, ...] in csv (required), see below
+    output_template_csv = [output_template_1, output_template_2, ...] in csv (required), see below
 
-    output_data_i = {
+    output_template_i = {
       'data_type' : str (required), one of the following types
-                    'incidence data',
-                    'prevalence data',
-                    'remission data',
-                    'excess-mortality data',
-                    'relative-risk data',
-                    'smr data',
-                    'mortality data',
-                    'duration data',
-                    'cause-specific mortality data',
+                    'incidence',
+                    'prevalence',
+                    'remission',
+                    'excess-mortality',
+                    'relative-risk',
+                    'smr',
+                    'with-condition-mortality',
+                    'duration',
+                    'cause-specific-mortality', 
 
-      'region' : str (required),
+      'area' : str (required), a geographic area defined in the area table,
 
       'sex' : str (required), one of 'male', 'female', 'total',
 
-      'age_start' : int[0, 100], <= age_end (required),
+      'age_start' : int[0, 150], <= age_end (required),
 
-      'age_end' : int[0, 100], >= age_start (required),
+      'age_end' : int[0, 150], >= age_start (required),
 
-      'age_weights' : [ float, float, ... ] (optional), length equals age_end - age_start + 1,
+      'year_start' : int[1900, 2050], <= year_end (required),
+
+      'year_end' : int[1900, 2050], >= year_start (required),
+
+      'age_weights' : [ float, float, ... ] (required*), length equals age_end - age_start + 1,
                       default/missing assume to be [ 1, ... ],
 
-      'year_start' : int[1950, 2010], <= year_end (required),
-
-      'year_end' : int[1950, 2010], >= year_start (required),
-
-      additional keys, with corresponding values for all selected country-level covariates for this
+?      additional keys, with corresponding values for all selected country-level covariates for this
       data_type, this region, this sex, this year_start and this year_end
     }
