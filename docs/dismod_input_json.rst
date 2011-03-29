@@ -12,7 +12,7 @@ This document describes the complete input in json for running a DisMod job.
 
       'output_template' : output_template_csv (required), see below,
 
-      'areas_hierarchy' : [(parent_area, child_area), ...] (required), list of pairs of areas describing the area hierarchy,
+      'areas_hierarchy' : [[parent_area, child_area], ...] (required), list of pairs of areas describing the area hierarchy,
 
       'areas_to_fit' : [area_1, area_2, ...] (required), list of areas in area hierarchy,
     }
@@ -188,7 +188,7 @@ This document describes the complete input in json for running a DisMod job.
 
       'area' : str (required), a geographic area defined in the area table,
 
-      'sex' : str (required), one of 'male', 'female', 'total',
+      'sex' : str (required), one of 'male', 'female',
 
       'age_start' : int[0, 150], <= age_end (required),
 
