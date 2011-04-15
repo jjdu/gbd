@@ -34,6 +34,9 @@ from forms import *
 
 @login_required
 def data_upload(request, id=-1):
+    # TODO: make these meaningful urls
+    ext_url = DISMOD_BASE_URL + 'dismod/input/'
+
     # if id != -1, append the data to DiseaseModel.get(id=id)
     if id == -1:
         dm = None
@@ -139,7 +142,6 @@ def data_upload(request, id=-1):
             priors.json = json.dumps(dismod3.settings.default_priors)
             priors.save()
                 
-
             return HttpResponseRedirect(reverse('gbd.dismod_data_server.views.dismod_summary', args=[dm.id])) # Redirect after POST
 
     # find covariate slugs
@@ -150,10 +152,30 @@ def data_upload(request, id=-1):
             cov_slugs += ','
         cov_slugs += cov_type.slug
 
-    # modify datachecker.jnlp file
-    f = open('public/datachecker.jnlp')
-    text = f.read().replace('base_url', DISMOD_BASE_URL).replace('session_id', request.COOKIES['sessionid']).replace('cov_slugs', cov_slugs)
-    f.close()
+    # jnlp file
+    text = '<?xml version="1.0" encoding="UTF-8"?>' + \
+'\n<jnlp spec="1.0" codebase="' + DISMOD_BASE_URL + 'public/" href="dc.jnlp">' + \
+'\n  <information>' + \
+'\n    <title>Data Checker</title>' + \
+'\n    <vendor>IHME UW</vendor>' + \
+'\n    <offline-allowed/>' + \
+'\n  </information>' + \
+'\n  <security>' + \
+'\n    <all-permissions/>' + \
+'\n  </security>' + \
+'\n    <resources>' + \
+'\n    <j2se version="1.6+" initial-heap-size="128m" max-heap-size ="1024m"/>' + \
+'\n    <jar href="DataChecker.jar"/>' + \
+'\n    <jar href="opencsv-2.2.jar"/>' + \
+'\n  </resources>' + \
+'\n  <application-desc main-class="uw.ihme.dismod.DataCheckerFrame">' + \
+'\n    <argument>' + DISMOD_BASE_URL + '</argument>' + \
+'\n    <argument>' + request.COOKIES['sessionid'] + '</argument>' + \
+'\n    <argument>' + cov_slugs + '</argument>' + \
+'\n    <argument>' + ext_url + '</argument>' + \
+'\n  </application-desc>' + \
+'\n</jnlp>'
+
     f = open('public/dc.jnlp', 'w')
     f.write(text)
     f.close()
@@ -1588,4 +1610,23 @@ def dismod_download_posterior(request, id):
 
     return response
 
+@login_required
+def dismod_input(request):
+    #if request.method == 'POST': save dismod_input in a file
+    #if request.method == 'GET': open dismod input file & send
+    response = ''
+    if request.method == 'GET':
+        filename = request.GET.get('filename')
+        f = open(filename, 'r')  
+        dismod_input = f.read()  
+        f.close()
+        response = dismod_input
+
+    elif request.method == 'POST':
+        dismod_input = request.POST.get('dismod_input')
+        f = open('public/input.json', 'w')  
+        f.write(dismod_input)  
+        f.close()
+
+    return HttpResponse(response)
 
