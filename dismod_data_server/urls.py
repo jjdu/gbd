@@ -66,4 +66,5 @@ urlpatterns = patterns(
     (r'experimental/spm_monitor/(\d+)', 'dismod_spm_monitor'),
     (r'experimental/spm_view_results/(\d+)', 'dismod_spm_view_results'),
 
+    (r'input/$', 'dismod_input'),
     )

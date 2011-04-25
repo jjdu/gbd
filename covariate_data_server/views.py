@@ -545,8 +545,8 @@ def get_covariate_data(request):
     request.POST:
     -------------
       data_csv : csv
-        data columns Year_Start, Year_End and Sex are required and if a CovariateType that is 
-        region_only is included in cov_req Region is required otherwise Country ISO3 Code is required
+        data columns year_start, year_end and sex are required and if a CovariateType that is 
+        region_only is included in cov_req region is required otherwise country_iso3_code is required
       cov_req : json
         a list of dicts, each for a covariate type, of two keys: slug and transform that is a list of
         transform strings: original, log, logit, squared, cubed, normalized, lag-<years> where <year> 

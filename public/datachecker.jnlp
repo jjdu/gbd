@@ -17,5 +17,6 @@
       <argument>base_url</argument>
       <argument>session_id</argument>
       <argument>cov_slugs</argument>
+      <argument>ext_url</argument>
    </application-desc>
 </jnlp>

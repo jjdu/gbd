@@ -1,0 +1,25 @@
+age_end	age_start	country_iso3_code	gbd_cause	parameter	parameter_value	region	sex	standard_error	units	year_end	year_start
+34	25	USA	type_2_diabetes	prevalence data	0	"North America, High Income"	total	0.0001	1	2005	2005
+44	35	USA	type_2_diabetes	prevalence data	0.001	"North America, High Income"	female	0.0009995	1	2005	2005
+54	45	USA	type_2_diabetes	prevalence data	0.067	"North America, High Income"	male	0.00790639	1	2005	2005
+64	55	USA	type_2_diabetes	prevalence data	0.167	"North America, High Income"	total	0.011794533	1	1990	1990
+74	65	USA	type_2_diabetes	prevalence data	0.222	"North America, High Income"	female	0.013142146	1	1990	1990
+84	75	USA	type_2_diabetes	prevalence data	0.231	"North America, High Income"	male	0.013328128	1	1990	1990
+100	85	CAN	type_2_diabetes	prevalence data	0.194	"North America, High Income"	total	0.012504559	1	2005	2005
+34	25	CAN	type_2_diabetes	incidence data	0.001	"North America, High Income"	female	0.0009995	1	2005	2005
+44	35	CAN	type_2_diabetes	incidence data	0	"North America, High Income"	male	0.0001	1	2005	2005
+54	45	CAN	type_2_diabetes	incidence data	0.015	"North America, High Income"	total	0.003843826	1	1990	1990
+64	55	CAN	type_2_diabetes	incidence data	0.018	"North America, High Income"	female	0.004204284	1	1990	1990
+74	65	CAN	type_2_diabetes	incidence data	0.025	"North America, High Income"	male	0.004937104	1	1990	1990
+84	75	THA	type_2_diabetes	incidence data	0.008	"Asia, Southeast"	total	0.002817091	1	2005	2005
+100	85	THA	type_2_diabetes	incidence data	0.015	"Asia, Southeast"	female	0.003843826	1	2005	2005
+59	25	THA	type_2_diabetes	excess mortality data	0.007	"Asia, Southeast"	male	0.002636475	1	2005	2005
+74	60	THA	type_2_diabetes	excess mortality data	0.022	"Asia, Southeast"	total	0.004638534	1	1990	1990
+100	75	THA	type_2_diabetes	excess mortality data	0.066	"Asia, Southeast"	female	0.007851369	1	1990	1990
+34	25	THA	type_2_diabetes	prevalence data	0	"Asia, Southeast"	male	0.0001	1	1990	1990
+44	35	JPN	type_2_diabetes	prevalence data	0.008	"Asia Pacific, High Income"	total	0.002817091	1	2005	2005
+54	45	JPN	type_2_diabetes	prevalence data	0.051	"Asia Pacific, High Income"	female	0.006956939	1	2005	2005
+64	55	JPN	type_2_diabetes	prevalence data	0.149	"Asia Pacific, High Income"	male	0.011260506	1	2005	2005
+74	65	JPN	type_2_diabetes	prevalence data	0.193	"Asia Pacific, High Income"	total	0.012480024	1	1990	1990
+84	75	JPN	type_2_diabetes	prevalence data	0.256	"Asia Pacific, High Income"	female	0.01380087	1	1990	1990
+100	85	JPN	type_2_diabetes	prevalence data	0.208	"Asia Pacific, High Income"	male	0.012834952	1	1990	1990

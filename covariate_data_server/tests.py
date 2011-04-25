@@ -309,7 +309,7 @@ class CovariateDataServerTestCase(TestCase):
         c.login(username='red', password='red')
 
         # make an output key list
-        key_list = ['Region', 'Country ISO3 Code', 'Year Start', 'Year End', 'Sex']
+        key_list = ['region', 'country_iso3_code', 'year_start', 'year_end', 'sex']
    
         # make a csv string
         strIO = StringIO.StringIO()

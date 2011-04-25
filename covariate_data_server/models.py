@@ -36,9 +36,9 @@ class CovariateType(models.Model):
         Parameters:
         -----------
           data_list : list
-            list of data dict in that the keys Year Start, Year End and Sex are required
-            and if region_only of the CovariateType object is True the key Region is required
-            otherwise the key Country ISO3 Code is required.   
+            list of data dict in that the keys year_start, year_end and sex are required
+            and if region_only of the CovariateType object is True the key region is required
+            otherwise the key country_iso3_code is required.   
           transform_list : list
             list of strs each representing the transformation scheme: original, log, logit,
             squared, cubed, normalized, quantized
@@ -58,9 +58,9 @@ class CovariateType(models.Model):
         Parameters:
         -----------
           data_list : list
-            list of data dict in that the keys Year Start, Year End and Sex are required
-            and if region_only of the CovariateType object is True the key Region is required
-            otherwise the key Country ISO3 Code is required.
+            list of data dict in that the keys year_start, year_end and sex are required
+            and if region_only of the CovariateType object is True the key region is required
+            otherwise the key country_iso3_code is required.
           lag_year : int
             number of lage years.
 
@@ -79,9 +79,9 @@ class CovariateType(models.Model):
         Parameters:
         -----------
           data_list : list
-            list of data dict in that the keys Year Start, Year End and Sex are required
-            and if region_only of the CovariateType object is True the key Region is required
-            otherwise the key Country ISO3 Code is required.   
+            list of data dict in that the keys year_start, year_end and sex are required
+            and if region_only of the CovariateType object is True the key region is required
+            otherwise the key country_iso3_code is required.   
           transform_list : list
             list of strs each representing the transformation scheme: original, log, logit,
             squared, cubed, normalized, quantized, or None for lag on original
@@ -124,18 +124,18 @@ class CovariateType(models.Model):
         y_end = 0
         if transform_list != None:
             for data_dict in data_list:
-                start = int(data_dict['Year Start'])
+                start = int(data_dict['year_start'])
                 if start < y_start:
                     y_start = start
-                end = int(data_dict['Year End'])
+                end = int(data_dict['year_end'])
                 if end > y_end:
                     y_end = end
         else:
             for data_dict in data_list:
-                start = int(data_dict['Year Start']) - lag_year
+                start = int(data_dict['year_start']) - lag_year
                 if start < y_start:
                     y_start = start
-                end = int(data_dict['Year End']) - lag_year
+                end = int(data_dict['year_end']) - lag_year
                 if end > y_end:
                     y_end = end
 
@@ -160,30 +160,30 @@ class CovariateType(models.Model):
             # check region or country
             if self.region_only:
                 try:
-                    region = data['Region']
+                    region = data['region']
                 except KeyError:
-                    raise Exception('Region is missing for region_only covariate in data row %d' % ii)
+                    raise Exception('region is missing for region_only covariate in data row %d' % ii)
             else:
                 try:
-                    iso3 = data['Country ISO3 Code']
+                    iso3 = data['country_iso3_code']
                 except KeyError:
-                    raise Exception('Country ISO3 Code is missing in data row %d' % ii)
+                    raise Exception('country_iso3_code is missing in data row %d' % ii)
 
             # check year start
             try:
-                year_start = int(data['Year Start'])
+                year_start = int(data['year_start'])
             except KeyError:
-                raise Exception('Year Start is missing in data dict %d' % ii)
+                raise Exception('year_start is missing in data dict %d' % ii)
             except ValueError:
-                raise Exception('Year Start is not an integer in data dict %d' % ii)
+                raise Exception('year_start is not an integer in data dict %d' % ii)
 
             # check year end
             try:
-                year_end = int(data['Year End'])
+                year_end = int(data['year_end'])
             except KeyError:
-                raise Exception('Year End is missing in data dict %d' % ii)
+                raise Exception('year_end is missing in data dict %d' % ii)
             except ValueError:
-                raise Exception('Year End is not an integer in data dict %d' % ii)
+                raise Exception('year_end is not an integer in data dict %d' % ii)
 
             # add lag
             if transform_list == None:
@@ -192,9 +192,9 @@ class CovariateType(models.Model):
 
             # check sex
             try:
-                sex = data['Sex']
+                sex = data['sex']
             except KeyError:
-                raise Exception('Sex is missing in data dict %d' % ii)
+                raise Exception('sex is missing in data dict %d' % ii)
             if sex == 'all': 
                 sex = 'total'  # if data is applied to males and females using sex == 'all',
                                # take the covariate value for sex == 'total'

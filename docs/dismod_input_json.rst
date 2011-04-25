@@ -30,7 +30,7 @@ This document describes the complete input in json for running a DisMod job.
                     "with-condition-mortality",
                     "duration",
                     "cause-specific-mortality",
-(note for adding additional data types in the future, data_types are lowercase characters and dashes, without any spaces or non-alphabet characters)
+    (note for adding additional data types in the future, data_types are lowercase characters and dashes, without any spaces or non-alphabet characters)
 
       "value" : float (required), parameter value limits
                 "incidence" >= 0,
@@ -63,11 +63,11 @@ This document describes the complete input in json for running a DisMod job.
       
       "upper_ci" : float > Parameter Value (optional*),
 
-(* one of se, ess, or ci must be set)
+    (* one of se, ess, or ci must be set)
 
       "age_weights" : [ float, float, ... ] (required*), length equals age_end - age_start + 1,
                       default/missing assume to be [ 1, ... ],
-(* this will be merged in by the MDA and is not required of the user)
+    (* this will be merged in by the MDA and is not required of the user)
 
       "study_id" : int >= 0 (optional),
 
@@ -79,7 +79,7 @@ This document describes the complete input in json for running a DisMod job.
       covariates merged for this data_type, this region, this sex, this year_start and this year_end
     }
 
-    param_list = [
+    param_list = {
       "prevalence" : param_dict (required), see below,
 
       "incidence" : param_dict (required), see below,
@@ -95,7 +95,7 @@ This document describes the complete input in json for running a DisMod job.
       "condition" : str (required), one of the GBD causes,
 
       "notes" : str (required)
-    ]
+    }
 
     param_dict = {
       "priors" : prior_dict (required), see below,
@@ -105,44 +105,44 @@ This document describes the complete input in json for running a DisMod job.
 
     prior_dict = {
       "smoothness" : {
-        "amount" : str (required), one of "Slightly", "No Prior", "Moderately", "Very"],
+        "amount" : str (required), one of "Slightly", "No Prior", "Moderately", "Very"], default "Slightly",
 
-        "age_start" : int[0, 100], <= "age_end" (required),
+        "age_start" : int[0, 100], <= "age_end" (required), default 0,
 
-        "age_end" : int[0, 100], >= age_start (required)
+        "age_end" : int[0, 100], >= age_start (required), default 100
       },
 
-      "heterogeneity" : str (required), one of "Slightly", "Moderately", "Very", "Unusable",
+      "heterogeneity" : str (required), one of "Slightly", "Moderately", "Very", "Unusable", default "Slightly",
 
       "level_value" : {
-        "value" : float >= level_bounds["lower"], <= level_bounds["upper"] (required),
+        "value" : float >= level_bounds["lower"], <= level_bounds["upper"] (required), default 0,
 
-        "age_before" : int[0, 100], <= age_after (required),
+        "age_before" : int[0, 100], <= age_after (required), default 0,
 
-        "age_after" : int[0, 100], >= age_before (required)
+        "age_after" : int[0, 100], >= age_before (required), default 100
       },
 
       "level_bounds" : {
-        "upper" : float >=0 except for prevalence [0, 1] (required),
+        "upper" : float >=0 except for prevalence [0, 1] (required), default 0,
 
-        "lower" : float >=0, <= "upper" (required)
+        "lower" : float >=0, <= "upper" (required), default 0
       },
 
       "increasing" : {
-        "age_start" : int[0, 100], <= "age_end" (required),
+        "age_start" : int[0, 100], <= "age_end" (required), default 0,
 
-        "age_end" : int[0, 100] (required)
+        "age_end" : int[0, 100] (required), default 0
       },
 
       "decreasing" : {
-        "age_start" : int[0, 100], <= "age_end" (required),
+        "age_start" : int[0, 100], <= "age_end" (required), default 0,
 
-        "age_end" : int[0, 100], >= age_start (required)
+        "age_end" : int[0, 100], >= age_start (required), default 0
       },
 
-      "max_y" : float > 0 (required),
+      "y_maximum" : float > 0 (required), default 1,
 
-      "param_age_mesh" : [float, float, ...], numbers are in range[0, 100] increasing (required)
+      "parameter_age_mesh" : [float, float, ...], numbers are in range[0, 100] increasing (required), default [0,10,20,30,40,50,60,70,80,90,100]
     }
 
     covariate_dict = {
@@ -152,18 +152,18 @@ This document describes the complete input in json for running a DisMod job.
     }
 
     study_level_type_i : {
-      "rate" : int = 0 or = 1 (required),
+      "rate" : int = 0 or = 1 (required), default 1,
 
-      "error" : int = 0 or = 1 (required),
-      "reference_value" : float (required)
+      "error" : int = 0 or = 1 (required), default 0,
+      "reference_value" : float (required), default 0
     }
 
     country_level_type_i : {
-      "rate" : int = 0 or = 1 (required),
+      "rate" : int = 0 or = 1 (required), default 1,
 
-      "error" : int = 0 or = 1 (required),
+      "error" : int = 0 or = 1 (required), default 0,
 
-      "reference_value" : string (required), a number or "Country Specific Value"
+      "reference_value" : string (required), a number or "Country Specific Value", default Country Specific Value"
     }
 
     output_template_csv = [output_template_1, output_template_2, ...] in csv (required), see below
